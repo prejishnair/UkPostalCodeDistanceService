@@ -3,6 +3,7 @@ package com.wcc.transformer;
 import com.wcc.dto.DistanceRequest;
 import com.wcc.dto.ErrorResponse;
 import com.wcc.exception.InvalidPostalCodeException;
+import com.wcc.utility.PostalCodeUtility;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,8 +17,8 @@ public class DistanceRequestTransformer {
     private static final Pattern UK_POSTAL_CODE_PATTERN = Pattern.compile(UK_POSTAL_CODE_REGEX);
 
     public DistanceRequest transform(String postalCode1, String postalCode2) throws InvalidPostalCodeException {
-        postalCode1 = postalCode1.replace(" ", ""); // Remove white spaces from postalCode1
-        postalCode2 = postalCode2.replace(" ", ""); // Remove white spaces from postalCode2
+        postalCode1 = PostalCodeUtility.removeSpaces(postalCode1); // Remove white spaces from postalCode1
+        postalCode2 = PostalCodeUtility.removeSpaces(postalCode2); // Remove white spaces from postalCode2
 
         List<String> invalidPostalCodes = Stream.of(postalCode1, postalCode2)
                 .filter(postalCode -> !validatePostalCode(postalCode))
