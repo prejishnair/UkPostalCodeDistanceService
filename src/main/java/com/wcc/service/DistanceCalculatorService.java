@@ -29,11 +29,11 @@ public class DistanceCalculatorService {
         double distance = calculateDistanceBetweenLocations(location1, location2);
 
 
-        return responseTransformer.toDistanceResponse(request, location1, location2, distance);
+        return responseTransformer.toDistanceResponse(location1, location2, distance);
     }
 
 
-    private double calculateDistanceBetweenLocations(Location location1, Location location2) {
+    double calculateDistanceBetweenLocations(Location location1, Location location2) {
         double lat1 = Math.toRadians(location1.getLatitude());
         double lon1 = Math.toRadians(location1.getLongitude());
         double lat2 = Math.toRadians(location2.getLatitude());
@@ -48,6 +48,15 @@ public class DistanceCalculatorService {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return DistanceConstants.EARTH_RADIUS * c;
+    }
+
+
+    public Location findByPostalCode(String postalCode) {
+        return locationConnector.findByPostalCode(postalCode);
+    }
+
+    public void updateService(Location existingLocation) {
+        Location updatedLocation = locationConnector.save(existingLocation);
     }
 }
 

@@ -10,7 +10,7 @@ The project need to expose 2 endpoints, that can talk to database layer.
 | OPERATION | ENDPOINT                                  | DESCRIPTION                                                                                                                                         |
 | --------- |-------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
 | GET | /api/distance/{postalcode1}/{postalcode2} | Endpoint fetches the required data based on the input variables (postalcode1,postalcode2) and then calculates the distance based on business logic. |
-| PUT | /api/distance/{postalcode}                | updates the postal-codes                                                                                                                            | 
+| PUT | /api/distance/update                      | updates the postal-codes                                                                                                                            | 
 
 ## Skill set used
 

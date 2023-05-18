@@ -7,5 +7,7 @@ public class DistanceRequest {
     private String postalCode1;
     private String postalCode2;
 
+    public DistanceRequest() {
+    }
 }
 

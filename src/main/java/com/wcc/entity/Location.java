@@ -1,5 +1,6 @@
 package com.wcc.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -9,6 +10,7 @@ import javax.persistence.*;
 public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(hidden = true)
     private Long id;
     @Column(name = "POSTALCODE")
     private String postalCode;
@@ -16,4 +18,5 @@ public class Location {
     private double latitude;
     @Column(name = "LONGITUDE")
     private double longitude;
+
 }
