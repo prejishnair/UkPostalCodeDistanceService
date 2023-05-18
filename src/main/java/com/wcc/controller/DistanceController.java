@@ -38,10 +38,10 @@ public class DistanceController {
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = DistanceRequest.class)))),
             @ApiResponse(responseCode = "400", description = "Bad Request (when the values of the input not in the correct way)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
-    @GetMapping(value = "/{postalCode1}/{postalCode2}", produces = "application/json")
+    @GetMapping(produces = "application/json")
     public ResponseEntity<?> calculateDistance(
-            @PathVariable("postalCode1") String postalCode1,
-            @PathVariable("postalCode2") String postalCode2) {
+            @RequestParam("postalCode1") String postalCode1,
+            @RequestParam("postalCode2") String postalCode2) {
         logger.info("Calculating distance for postal codes: {} and {}", postalCode1, postalCode2);
 
         DistanceResponse response;

@@ -59,10 +59,10 @@ public class DistanceCalculatorServiceTest {
         location2.setLongitude(-2.121487);
 
         // Calculating expected distance
-        double expectedDistance = 0.8050251643078993;
+        String expectedDistance = "0.81 km";
 
         // Calculating actual distance
-        double actualDistance = distanceCalculatorService.calculateDistanceBetweenLocations(location1, location2);
+        String actualDistance = distanceCalculatorService.calculateDistanceBetweenLocations(location1, location2);
 
         // Assertion
         Assertions.assertEquals(expectedDistance, actualDistance);
@@ -89,8 +89,7 @@ public class DistanceCalculatorServiceTest {
         expectedResponse.setLongitude1(location1.getLongitude());
         expectedResponse.setLatitude2(location2.getLatitude());
         expectedResponse.setLongitude2(location2.getLongitude());
-        expectedResponse.setDistance(225.5);
-        expectedResponse.setUnit("km");
+        expectedResponse.setDistance("225.5km");
 
         // Mocking the behavior of the LocationConnector
         LocationConnector locationConnector = Mockito.mock(LocationConnector.class);
@@ -101,7 +100,7 @@ public class DistanceCalculatorServiceTest {
         DistanceResponseTransformer responseTransformer = new DistanceResponseTransformer();
 
         // Calling the method under test
-        DistanceResponse actualResponse = responseTransformer.toDistanceResponse(location1, location2, 225.5);
+        DistanceResponse actualResponse = responseTransformer.toDistanceResponse(location1, location2, "225.5km");
 
         // Asserting the expected response with the actual response
         Assertions.assertEquals(expectedResponse, actualResponse);

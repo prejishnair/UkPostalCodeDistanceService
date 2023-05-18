@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DistanceResponseTransformer {
-    public static DistanceResponse toDistanceResponse(Location location1, Location location2, double distance){
+    public static DistanceResponse toDistanceResponse(Location location1, Location location2, String distance){
         DistanceResponse result = new DistanceResponse();
         if (location1 != null) {
             result.setPostalCode1(location1.getPostalCode());
@@ -20,7 +20,6 @@ public class DistanceResponseTransformer {
             result.setLongitude2(location2.getLongitude());
         }
         result.setDistance(distance);
-        result.setUnit("km");
         return result;
     }
 
