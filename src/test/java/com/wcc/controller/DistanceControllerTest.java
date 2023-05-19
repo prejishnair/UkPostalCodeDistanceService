@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
@@ -30,6 +31,7 @@ class DistanceControllerTest {
 
     @Mock
     private DistanceRequestTransformer distanceRequestTransformer;
+
 
     @BeforeEach
     void setUp() {
@@ -46,7 +48,7 @@ class DistanceControllerTest {
         DistanceResponse distanceResponse = new DistanceResponse();
 
         // Mock dependencies
-        doReturn(distanceRequest).when(distanceRequestTransformer).transform(postalCode1, postalCode2);
+        doReturn(distanceRequest).when(distanceRequestTransformer).transformCalculateDistanceRequest(postalCode1, postalCode2);
         doReturn(distanceResponse).when(distanceCalculatorService).calculateDistance(distanceRequest);
 
         // Invoke the method
@@ -66,7 +68,7 @@ class DistanceControllerTest {
         InvalidPostalCodeException exception = new InvalidPostalCodeException("Invalid postal code");
 
         // Mock dependencies
-        doThrow(exception).when(distanceRequestTransformer).transform(postalCode1, postalCode2);
+        doThrow(exception).when(distanceRequestTransformer).transformCalculateDistanceRequest(postalCode1, postalCode2);
 
         // Invoke the method
         ResponseEntity<?> responseEntity = distanceController.calculateDistance(postalCode1, postalCode2);
@@ -82,68 +84,80 @@ class DistanceControllerTest {
     }
 
     @Test
-    public void testUpdatePostalCodes_ValidInput_Success() {
-        // Arrange
-        Location location = new Location();
-        location.setPostalCode("12345");
-        location.setLatitude(12.345);
-        location.setLongitude(67.890);
+    public void testUpdatePostalCodes_ExistingPostalCode_Success() {
+        // Mocking input
+        Location inputLocation = new Location();
+        inputLocation.setPostalCode("12345");
+        inputLocation.setLatitude(1.23);
+        inputLocation.setLongitude(4.56);
 
+        // Mocking existing location
         Location existingLocation = new Location();
         existingLocation.setPostalCode("12345");
-        existingLocation.setLatitude(12.345);
-        existingLocation.setLongitude(67.890);
+        existingLocation.setLatitude(7.89);
+        existingLocation.setLongitude(0.12);
 
-        Mockito.when(distanceCalculatorService.findByPostalCode(location.getPostalCode()))
-                .thenReturn(existingLocation);
+        Mockito.when(distanceRequestTransformer.transformUpdateRequest(inputLocation.getPostalCode())).thenReturn(inputLocation);
+        Mockito.when(distanceCalculatorService.findByPostalCode(inputLocation.getPostalCode())).thenReturn(existingLocation);
 
-        // Act
-        ResponseEntity<?> response = distanceController.updatePostalCodes(location);
+        ResponseEntity<?> response = distanceController.updatePostalCodes(inputLocation);
 
-        // Assert
-        Mockito.verify(distanceCalculatorService, Mockito.times(1)).updateService(existingLocation);
+        // Verify that the service method was called with the correct location
+        Mockito.verify(distanceCalculatorService).updateService(existingLocation);
+
+        // Verify the response code
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
-    public void testUpdatePostalCodes_InvalidInput_BadRequest() {
-        // Arrange
-        Location location = new Location();
-        location.setPostalCode("54321");
-        location.setLatitude(12.345);
-        location.setLongitude(67.890);
+    public void testUpdatePostalCodes_NonExistingPostalCode_BadRequest() {
+        // Mocking input
+        Location inputLocation = new Location();
+        inputLocation.setPostalCode("12345");
+        inputLocation.setLatitude(1.23);
+        inputLocation.setLongitude(4.56);
 
-        Mockito.when(distanceCalculatorService.findByPostalCode(location.getPostalCode()))
-                .thenReturn(null);
+        // Mocking existing location as null
+        Mockito.when(distanceRequestTransformer.transformUpdateRequest(inputLocation.getPostalCode())).thenReturn(inputLocation);
+        Mockito.when(distanceCalculatorService.findByPostalCode(inputLocation.getPostalCode())).thenReturn(null);
 
-        // Act
-        ResponseEntity<?> response = distanceController.updatePostalCodes(location);
+        ResponseEntity<?> response = distanceController.updatePostalCodes(inputLocation);
 
-        // Assert
-        ErrorResponse errorResponse = (ErrorResponse) response.getBody();
+        // Verify that the service method was not called
+        Mockito.verify(distanceCalculatorService, Mockito.never()).updateService(any(Location.class));
+
+        // Verify the response code and error message
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        ErrorResponse errorResponse = (ErrorResponse) response.getBody();
+        Assertions.assertNotNull(errorResponse);
+        Assertions.assertEquals("Invalid Postal Code", errorResponse.getError());
         Assertions.assertEquals("Postal code does not exist in the database.", errorResponse.getDescription());
     }
 
     @Test
     public void testUpdatePostalCodes_Exception_InternalServerError() {
-        // Arrange
-        Location location = new Location();
-        location.setPostalCode("12345");
-        location.setLatitude(12.345);
-        location.setLongitude(67.890);
+        // Mocking input
+        Location inputLocation = new Location();
+        inputLocation.setPostalCode("12345");
+        inputLocation.setLatitude(1.23);
+        inputLocation.setLongitude(4.56);
 
-        Mockito.when(distanceCalculatorService.findByPostalCode(location.getPostalCode()))
-                .thenThrow(new RuntimeException("Database connection error."));
+        // Mocking an exception
+        Mockito.when(distanceRequestTransformer.transformUpdateRequest(inputLocation.getPostalCode())).thenThrow(new RuntimeException("Something went wrong"));
 
-        // Act
-        ResponseEntity<?> response = distanceController.updatePostalCodes(location);
+        ResponseEntity<?> response = distanceController.updatePostalCodes(inputLocation);
 
-        // Assert
-        ErrorResponse errorResponse = (ErrorResponse) response.getBody();
+        // Verify that the service method was not called
+        Mockito.verify(distanceCalculatorService, Mockito.never()).updateService(any(Location.class));
+
+        // Verify the response code and error message
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        ErrorResponse errorResponse = (ErrorResponse) response.getBody();
+        Assertions.assertNotNull(errorResponse);
         Assertions.assertEquals("Error Updating Postal Codes", errorResponse.getError());
-        Assertions.assertEquals("Database connection error.", errorResponse.getDescription());
+        Assertions.assertEquals("Something went wrong", errorResponse.getDescription());
     }
+
+
 }
 

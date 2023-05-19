@@ -46,7 +46,7 @@ public class DistanceController {
 
         DistanceResponse response;
         try {
-            DistanceRequest request = distanceRequestTransformer.transform(postalCode1, postalCode2);
+            DistanceRequest request = distanceRequestTransformer.transformCalculateDistanceRequest(postalCode1, postalCode2);
             response = distanceCalculatorService.calculateDistance(request);
         } catch (InvalidPostalCodeException e) {
             logger.error("Invalid postal code request: {}", e.getMessage());
@@ -72,6 +72,7 @@ public class DistanceController {
         logger.info("Updating postal codes: {}", location);
 
         try {
+            location = distanceRequestTransformer.transformUpdateRequest(location.getPostalCode());
             Location existingLocation = distanceCalculatorService.findByPostalCode(location.getPostalCode());
             if (existingLocation == null) {
                 ErrorResponse errorResponse = new ErrorResponse();
