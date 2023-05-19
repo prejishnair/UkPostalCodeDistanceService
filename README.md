@@ -19,6 +19,7 @@ The project need to expose 2 endpoints, that can talk to database layer.
 - Basic Auth
 - h2 Database
 - Test Driven Development (TDD)
+- Docker container
 
 ## How to start the project?
 Run the main app (PostalCodeDistanceApplication.java) class.
@@ -34,6 +35,14 @@ so by default it will start on the port localhost:8080 now!
 
 > Since basic auth is implemented a username and password need to be entered. 
 > You can find the same in application.properties file
+
+## Start the project with Docker
+Prerequisite : Need docker to be installed on your machine
+
+Steps
+1)Start a docker daemon (I use command dockerd.But there are more other options)
+2)docker build -t ukpostalcodedistanceservice:<version> .
+3)docker run -p 8080:8080 ukpostalcodedistanceservice:<version> .
 
 ### Table Definition
 
