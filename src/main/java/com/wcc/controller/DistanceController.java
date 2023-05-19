@@ -39,7 +39,7 @@ public class DistanceController {
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = DistanceRequest.class)))),
             @ApiResponse(responseCode = "400", description = "Bad Request (when the values of the input not in the correct way)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
-    @GetMapping(produces = "application/json")
+    @GetMapping(value = "/calculatedistance", produces = "application/json")
     public ResponseEntity<DistanceResponse> calculateDistance(
             @RequestParam("postalCode1") String postalCode1,
             @RequestParam("postalCode2") String postalCode2) {
