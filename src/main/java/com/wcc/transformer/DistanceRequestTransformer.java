@@ -1,7 +1,6 @@
 package com.wcc.transformer;
 
 import com.wcc.dto.DistanceRequest;
-import com.wcc.dto.ErrorResponse;
 import com.wcc.entity.Location;
 import com.wcc.exception.InvalidPostalCodeException;
 import com.wcc.utility.PostalCodeUtility;
@@ -24,11 +23,12 @@ public class DistanceRequestTransformer {
         return request;
     }
 
-    public Location transformUpdateRequest(String postalCode) throws InvalidPostalCodeException {
-        postalCode = removeSpacesAndValidate(postalCode);
+    public Location transformUpdateRequest(Location location) throws InvalidPostalCodeException {
+        String postalCode = removeSpacesAndValidate(location.getPostalCode());
 
-        Location location = new Location();
         location.setPostalCode(postalCode);
+        location.setLatitude(location.getLatitude());
+        location.setLongitude(location.getLongitude());
         return location;
     }
 
@@ -36,14 +36,15 @@ public class DistanceRequestTransformer {
         postalCode = PostalCodeUtility.removeSpaces(postalCode);
 
         if (!validatePostalCode(postalCode)) {
-            ErrorResponse errorResponse = new ErrorResponse("Bad Request", "Postal code is invalid");
-            throw new InvalidPostalCodeException("Postal Code Validation Failed.", errorResponse);
+            throw new InvalidPostalCodeException("Postal Code Validation Failed.");
         }
 
         return postalCode;
     }
 
+
     private boolean validatePostalCode(String postalCode) {
         return UK_POSTAL_CODE_PATTERN.matcher(postalCode).matches();
     }
+
 }

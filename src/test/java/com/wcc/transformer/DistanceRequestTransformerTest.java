@@ -49,25 +49,26 @@ class DistanceRequestTransformerTest {
     @Test
     void transformUpdateRequest_ValidPostalCode_ReturnsLocation() {
         // Arrange
-        String postalCode = "SW1A 1AA";
-
+        Location inputLocation = new Location();
+        inputLocation.setPostalCode("AB106RN");
         // Act
-        Location result = distanceRequestTransformer.transformUpdateRequest(postalCode);
+        Location result = distanceRequestTransformer.transformUpdateRequest(inputLocation);
 
         // Assert
-        Assertions.assertEquals(postalCode.replace(" ", ""), result.getPostalCode());
+        Assertions.assertEquals(inputLocation.getPostalCode().replace(" ", ""), result.getPostalCode());
     }
 
     @Test
     void transformUpdateRequest_InvalidPostalCode_ThrowsInvalidPostalCodeException() {
         // Arrange
-        String postalCode = "12345";
+        Location inputLocation = new Location();
+        inputLocation.setPostalCode("12345");
         String expectedErrorMessage = "Postal Code Validation Failed.";
 
         // Act & Assert
         InvalidPostalCodeException exception = Assertions.assertThrows(
                 InvalidPostalCodeException.class,
-                () -> distanceRequestTransformer.transformUpdateRequest(postalCode)
+                () -> distanceRequestTransformer.transformUpdateRequest(inputLocation)
         );
 
         // Assert

@@ -12,7 +12,6 @@ public class DistanceResponse {
     private Double latitude2;
     private Double longitude2;
     private String distance;
-    private ErrorResponse error;
 
     public DistanceResponse() {
     }

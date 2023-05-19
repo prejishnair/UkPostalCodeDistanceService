@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(value = "/api/distance")
@@ -39,26 +40,22 @@ public class DistanceController {
             @ApiResponse(responseCode = "400", description = "Bad Request (when the values of the input not in the correct way)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @GetMapping(produces = "application/json")
-    public ResponseEntity<?> calculateDistance(
+    public ResponseEntity<DistanceResponse> calculateDistance(
             @RequestParam("postalCode1") String postalCode1,
             @RequestParam("postalCode2") String postalCode2) {
         logger.info("Calculating distance for postal codes: {} and {}", postalCode1, postalCode2);
 
-        DistanceResponse response;
         try {
             DistanceRequest request = distanceRequestTransformer.transformCalculateDistanceRequest(postalCode1, postalCode2);
-            response = distanceCalculatorService.calculateDistance(request);
+            DistanceResponse response = distanceCalculatorService.calculateDistance(request);
+            logger.info("Distance calculated successfully");
+            return ResponseEntity.ok().body(response);
         } catch (InvalidPostalCodeException e) {
             logger.error("Invalid postal code request: {}", e.getMessage());
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setError("Invalid Request");
-            errorResponse.setDescription(e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage());
         }
 
-        logger.info("Distance calculated successfully");
-
-        return ResponseEntity.ok().body(response);
     }
 
 
@@ -68,17 +65,15 @@ public class DistanceController {
             @ApiResponse(responseCode = "400", description = "Bad Request (when the values of the input not in the correct way)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @PutMapping(value = "/update", consumes = "application/json")
-    public ResponseEntity<?> updatePostalCodes(@RequestBody Location location) {
+    public ResponseEntity<String> updatePostalCodes(@RequestBody Location location) {
         logger.info("Updating postal codes: {}", location);
 
         try {
-            location = distanceRequestTransformer.transformUpdateRequest(location.getPostalCode());
+            location = distanceRequestTransformer.transformUpdateRequest(location);
             Location existingLocation = distanceCalculatorService.findByPostalCode(location.getPostalCode());
             if (existingLocation == null) {
-                ErrorResponse errorResponse = new ErrorResponse();
-                errorResponse.setError("Invalid Postal Code");
-                errorResponse.setDescription("Postal code does not exist in the database.");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Postal code does not exist in the database.");
             }
 
             existingLocation.setPostalCode(location.getPostalCode());
@@ -88,13 +83,12 @@ public class DistanceController {
 
             logger.info("Postal codes updated successfully");
 
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            logger.error("Error updating postal codes: {}", e.getMessage());
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setError("Error Updating Postal Codes");
-            errorResponse.setDescription(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.ok().body("Postal code Updated");
+
+        } catch (InvalidPostalCodeException e) {
+            logger.error("Invalid postal code request: {}", e.getMessage());
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
