@@ -9,8 +9,6 @@ import com.wcc.exception.InvalidPostalCodeException;
 import com.wcc.transformer.DistanceResponseTransformer;
 import org.springframework.stereotype.Service;
 
-import java.text.DecimalFormat;
-
 @Service
 public class DistanceCalculatorService {
     private final LocationConnector locationConnector;
@@ -49,12 +47,9 @@ public class DistanceCalculatorService {
                         Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        double distance = DistanceConstants.EARTH_RADIUS * c;
+        double distance = Math.round(DistanceConstants.EARTH_RADIUS * c * 100) / 100.0;
 
-        DecimalFormat df = new DecimalFormat("0.00");
-        String formattedDistance = df.format(distance);
-
-        return Double.parseDouble(formattedDistance) + " km";
+        return distance + " km";
     }
 
 
